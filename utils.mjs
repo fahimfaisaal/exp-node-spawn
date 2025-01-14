@@ -14,8 +14,7 @@ export const countPrimeNumbersInChildProcess = async (range, ...spawnCommand) =>
     });
 
     spawnedProcess.on('error', (error) => {
-      // reject(error);
-      console.log(error)
+      reject(error);
     });
 
     spawnedProcess.on('close', (code) => {

@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import range from 'lodash.range';
 import { countPrimeNumbersInChildProcess, isPrime } from './utils.mjs';
 import { serve } from '@hono/node-server';
 
@@ -15,7 +14,7 @@ app.get('/health', (c) => {
 /**
  * Count Primes in Range using JavaScript
  */
-app.get('/count-prime', async (c) => {
+app.get('/primes', async (c) => {
   const from = parseInt(c.req.query('from'), 10);
   const to = parseInt(c.req.query('to'), 10);
 
@@ -24,21 +23,19 @@ app.get('/count-prime', async (c) => {
   }
 
   const t1 = performance.now();
-  const numbers = range(from, to)
-
-  let primeCount = 0
-  for (const num of numbers) {
-    if (isPrime(num)) primeCount++
+  const primes = []
+  for (let num = from; num <= to; num++ ) {
+    if (isPrime(num)) primes.push(num)
   }
   const t2 = performance.now();
   
-  return c.json({ from, to, primeCount, took: (t2 - t1) / 1e3 });
+  return c.json({ took: (t2 - t1) / 1e3, from, to, total: primes.length, primes: null });
 });
 
 /**
  * Count Primes in Range using Go Script
  */
-app.get('/count-prime/go', async (c) => {
+app.get('/go/primes', async (c) => {
   const from = parseInt(c.req.query('from'), 10);
   const to = parseInt(c.req.query('to'), 10);
 
@@ -46,10 +43,10 @@ app.get('/count-prime/go', async (c) => {
     return c.json({ error: 'Invalid query parameters' }, 400);
   }
   const t1 = performance.now();
-  const output = await countPrimeNumbersInChildProcess({ from, to }, './count-primes');
+  const { primes, total } = await countPrimeNumbersInChildProcess({ from, to }, './count-primes');
   const t2 = performance.now();
 
-  return c.json({ from, to, primeCount: +output.count, took: (t2 - t1) / 1e3, goTook: output.took });
+  return c.json({ took: (t2 - t1) / 1e3, from, to, total, primes });
 });
 
 

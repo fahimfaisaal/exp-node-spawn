@@ -1,15 +1,12 @@
 import { isPrime } from "../utils.mjs";
-import range from "lodash.range";
 
 const from = 1;
 const to = 100000000
 
-console.time('Took')
-const numbers = range(from, to)
+let primes = 0
 
-let primeCount = 0
-
-for (const num of numbers) {
-  if (isPrime(num)) primeCount++
+for (let num = from; num <= to; num++) {
+  if (isPrime(num)) primes++
 }
-console.timeEnd('Took')
+
+console.log("Total primes:", primes)

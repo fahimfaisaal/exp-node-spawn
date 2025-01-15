@@ -49,10 +49,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Encode the output as JSON and write it to stdout
-	encoder := json.NewEncoder(os.Stdout)
-	if err := encoder.Encode(len(calculatePrimesInRange(r.From, r.To))); err != nil {
-		fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
-		os.Exit(1)
-	}
+	fmt.Printf("%d", len(calculatePrimesInRange(r.From, r.To)))
 }

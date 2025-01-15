@@ -10,7 +10,7 @@ export const countPrimeNumbersInChildProcess = async (range, ...spawnCommand) =>
     console.log("Sent message")
 
     spawnedProcess.stdout.on('data', (data) => {
-      resolve(JSON.parse(data.toString()));
+      resolve(data.toString());
     });
 
     spawnedProcess.on('error', (error) => {
@@ -40,3 +40,25 @@ export function isPrime(n) {
     return true;
 }
 
+
+export function calculatePrimesInRange(from, to) {
+  const primes = Array.from({ length: to + 1 }, () => true)
+
+  for (let i = 2; i * i <= to; i++) {
+    if (primes[i]) {
+      for (let j = i * i; j <= to; j += i) {
+        primes[j] = false
+      }
+    }
+  }
+
+  const primeList = []  
+
+  for (let i = from - 1; i < primes.length; i++) {
+    if (primes[i]) {
+      primeList.push(i)
+    }
+  }
+
+  return primeList
+}

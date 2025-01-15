@@ -15,38 +15,55 @@ app.get('/health', (c) => {
  * Count Primes in Range using JavaScript
  */
 app.get('/primes', async (c) => {
-  const from = parseInt(c.req.query('from'), 10);
+  const from = parseInt(c.req.query('from'), 10) || 1;
   const to = parseInt(c.req.query('to'), 10);
 
   if (isNaN(from) || isNaN(to) || from > to || from < 0) {
     return c.json({ error: 'Invalid query parameters' }, 400);
   }
 
-  const t1 = performance.now();
-  const primes = []
-  for (let num = from; num <= to; num++ ) {
-    if (isPrime(num)) primes.push(num)
+  try {
+    // used an average algo because node js array can't take more than 2^32 - 1 elements
+    const t1 = performance.now();
+    let primes = 0
+    for (let i = from; i <= to; i++) {
+      if (isPrime(i)) {
+        primes++
+      }
+    }
+    const t2 = performance.now();
+
+    return c.json({ took: (t2 - t1) / 1e3, from, to, total: primes });
+  } catch (err) {
+    return c.json({
+      status: false,
+      message: err.message
+    }, 500)
   }
-  const t2 = performance.now();
-  
-  return c.json({ took: (t2 - t1) / 1e3, from, to, total: primes.length, primes: null });
 });
 
 /**
  * Count Primes in Range using Go Script
  */
 app.get('/go/primes', async (c) => {
-  const from = parseInt(c.req.query('from'), 10);
+  const from = parseInt(c.req.query('from'), 10) || 1;
   const to = parseInt(c.req.query('to'), 10);
 
   if (isNaN(from) || isNaN(to) || from > to || from < 0) {
     return c.json({ error: 'Invalid query parameters' }, 400);
   }
-  const t1 = performance.now();
-  const { primes, total } = await countPrimeNumbersInChildProcess({ from, to }, './count-primes');
-  const t2 = performance.now();
+  try {
+    const t1 = performance.now();
+    const total = Number(await countPrimeNumbersInChildProcess({ from, to }, './count-primes'));
+    const t2 = performance.now();
 
-  return c.json({ took: (t2 - t1) / 1e3, from, to, total, primes });
+    return c.json({ took: (t2 - t1) / 1e3, from, to, total });
+  } catch (err) {
+    return c.json({
+      status: false,
+      message: err.message
+    }, 500)
+  }
 });
 
 

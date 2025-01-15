@@ -6,33 +6,38 @@ import (
 	"os"
 )
 
-// Function to check if a number is prime
-func isPrime(n uint32) bool {
-	if n <= 1 {
-		return false
+func calculatePrimesInRange(from, to uint) []uint {
+	primes, primeNumbers := make([]bool, to+1), make([]uint, 0)
+
+	for i := range to + 1 {
+		primes[i] = true
 	}
-	if n <= 3 {
-		return true
-	}
-	if n%2 == 0 || n%3 == 0 {
-		return false
-	}
-	for i := uint32(5); i*i <= n; i += 6 {
-		if n%i == 0 || n%(i+2) == 0 {
-			return false
+
+	for i := uint(2); i*i <= to; i++ {
+		if primes[i] {
+			for j := i * i; j <= to; j += i {
+				primes[j] = false
+			}
 		}
 	}
-	return true
+
+	for i := uint(from); i <= to; i++ {
+		if primes[i] {
+			primeNumbers = append(primeNumbers, i)
+		}
+	}
+
+	return primeNumbers
 }
 
 type Range struct {
-	From uint32 `json:"from"`
-	To   uint32 `json:"to"`
+	From uint `json:"from"`
+	To   uint `json:"to"`
 }
 
 type Output struct {
-	Primes []uint32 `json:"primes"`
-	Total  uint32   `json:"total"`
+	Primes []uint `json:"primes"`
+	Total  uint   `json:"total"`
 }
 
 func main() {
@@ -43,21 +48,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error decoding JSON input: %v\n", err)
 		os.Exit(1)
 	}
-	primes := uint32(0)
-	for num := r.From; num <= r.To; num++ {
-		if prime := isPrime(num); prime {
-			primes++
-		}
-	}
-
-	output := Output{
-		// Primes: primes,
-		Total: primes,
-	}
 
 	// Encode the output as JSON and write it to stdout
 	encoder := json.NewEncoder(os.Stdout)
-	if err := encoder.Encode(output); err != nil {
+	if err := encoder.Encode(len(calculatePrimesInRange(r.From, r.To))); err != nil {
 		fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
 		os.Exit(1)
 	}

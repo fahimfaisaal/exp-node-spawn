@@ -7,6 +7,9 @@ import (
 )
 
 func calculatePrimesInRange(from, to uint) []uint {
+	if from < 2 {
+		from = 2
+	}
 	primes, primeNumbers := make([]bool, to+1), make([]uint, 0)
 
 	for i := range to + 1 {
